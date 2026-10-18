@@ -6,3 +6,4 @@ python-dotenv>=1,<2
 openai>=1.50,<3
 langgraph>=0.2,<2
 pytest>=8,<9
+-e .
