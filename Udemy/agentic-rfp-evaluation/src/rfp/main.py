@@ -10,12 +10,24 @@ initialize_database()
 st.title("Agentic RFP Evaluation & Supplier Ranking")
 st.caption("Evidence-grounded assessment with deterministic, explainable ranking.")
 with st.sidebar:
-    st.header("LLM settings")
-    entered_api_key=st.text_input("OpenAI API key",type="password",help="Used for this app session only. Leave blank to use OPENAI_API_KEY from .env.")
-    model_options=list(dict.fromkeys([settings.model,"gpt-4.1-mini","gpt-4.1","gpt-4o-mini","gpt-4o"]))
-    selected_model=st.selectbox("Chat model",model_options,index=model_options.index(settings.model))
-api_key=entered_api_key.strip() or settings.api_key
-if settings.demo_mode and not api_key: st.warning("DEMO MODE: keyword heuristic, not LLM evaluation. Do not use demo scores for procurement decisions.")
+    st.header("Evaluation mode")
+    evaluation_choice=st.radio(
+        "Choose how proposals are evaluated",
+        ["Mock", "AI-powered"],
+        help="Mock uses a local keyword heuristic. AI-powered sends proposal text to OpenAI.",
+    )
+    if evaluation_choice == "AI-powered":
+        entered_api_key=st.text_input("OpenAI API key",type="password",help="Used for this app session only. Leave blank to use OPENAI_API_KEY from .env.")
+        model_options=list(dict.fromkeys([settings.model,"gpt-4.1-mini","gpt-4.1","gpt-4o-mini","gpt-4o"]))
+        selected_model=st.selectbox("Chat model",model_options,index=model_options.index(settings.model))
+        api_key=entered_api_key.strip() or settings.api_key
+        if not api_key:
+            st.warning("Enter an OpenAI API key to use AI-powered evaluation.")
+    else:
+        api_key=None
+        selected_model=settings.model
+        st.warning("Mock mode uses keyword matching, not an LLM. Do not use these scores for procurement decisions.")
+evaluation_mode="mock" if evaluation_choice == "Mock" else "ai"
 criteria=get_active_criteria()
 with st.expander("Active criteria",expanded=True):
     st.dataframe(pd.DataFrame(criteria)[["criterion_id","name","description","weight","max_score"]],hide_index=True,use_container_width=True)
@@ -30,9 +42,9 @@ for i,f in enumerate(uploads or []):
         submitted=b.date_input("Submission date",value=date.today(),key=f"date{i}")
         experience=c.number_input("Experience rating (0-10)",min_value=0.,max_value=10.,value=5.,step=.5,key=f"exp{i}")
         inputs.append({"pdf_bytes":f.getvalue(),"metadata":{"supplier_name":name.strip(),"submission_date":submitted.isoformat(),"experience_rating":experience}})
-if st.button("Evaluate batch",type="primary",disabled=len(inputs)<2,use_container_width=True):
+if st.button("Evaluate batch",type="primary",disabled=len(inputs)<2 or (evaluation_mode == "ai" and not api_key),use_container_width=True):
     try:
-        with st.spinner("Evaluating and ranking suppliers..."): st.session_state["result"]=run_evaluation_batch(inputs,api_key=api_key,model=selected_model)
+        with st.spinner("Evaluating and ranking suppliers..."): st.session_state["result"]=run_evaluation_batch(inputs,api_key=api_key,model=selected_model,evaluation_mode=evaluation_mode)
         st.success(f"Run completed: {st.session_state['result']['rfp_run_id']}")
     except Exception as exc: st.error(f"Evaluation failed: {exc}")
 result=st.session_state.get("result")
