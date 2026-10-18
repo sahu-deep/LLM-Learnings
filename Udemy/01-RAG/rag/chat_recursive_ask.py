@@ -52,11 +52,23 @@ while True:
 
     # System prompt
     SYSTEM_PROMPT = f"""
-You are a helpful AI Assistant who answers user queries
-based on the available context retrieved from a PDF file.
+You are a helpful AI Assistant.
 
-You should only answer the user based on the following context
-and navigate the user to the correct page number to know more.
+Use the following context retrieved from the PDF as your primary
+source of information.
+
+If the answer is available in the context, answer using the context
+and mention the relevant page number.
+
+If the context does not contain enough information to answer the
+question, you may use your general knowledge to explain the concept.
+
+Clearly distinguish between:
+1. Information found in the PDF
+2. Additional explanation from your general knowledge
+
+Do not invent information and do not claim that general knowledge
+came from the PDF.
 
 Context:
 {context}
