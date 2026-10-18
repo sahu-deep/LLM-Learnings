@@ -26,6 +26,20 @@ python -m streamlit run src/rfp/main.py
 ```
 Four fictional PDFs are in `data/synthetic_rfps/`. Upload at least two.
 
+## Deploy to Streamlit Community Cloud
+This project is part of the `LLM-Learnings` repository. Deploy it with:
+
+- Repository: `sahu-deep/LLM-Learnings`
+- Branch: `main`
+- Main file path: `Udemy/agentic-rfp-evaluation/src/rfp/main.py`
+- Python version: 3.12
+
+The repository-root `requirements.txt` installs this project's package in
+editable mode so the app can import `rfp` from its `src` directory. Commit and
+push changes to both the project and root dependency file before deploying.
+The app accepts the OpenAI API key in its sidebar; no key needs to be committed
+or added to Streamlit secrets.
+
 ## Formulas
 Absolute score = sum((score / max score) * weight), out of 100.
 Benchmark = highest criterion score in batch. Gap = score - benchmark.
