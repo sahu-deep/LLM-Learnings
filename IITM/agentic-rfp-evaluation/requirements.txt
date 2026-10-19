@@ -6,4 +6,5 @@ python-dotenv>=1.0,<2.0
 pypdf>=5.0,<7.0
 langgraph>=0.2,<2.0
 pandas>=2.2,<4.0
+matplotlib>=3.9,<4.0
 pytest>=8.0,<10.0
